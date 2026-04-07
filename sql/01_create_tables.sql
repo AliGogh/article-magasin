@@ -64,3 +64,23 @@ CREATE TABLE LignePanier(
     FOREIGN KEY (panierId) REFERENCES Panier(panierId) ON DELETE CASCADE ,
     FOREIGN KEY (pid) REFERENCES Produit(pid) ON DELETE CASCADE
 );
+
+
+
+CREATE TABLE Commande (
+    cid int AUTO_INCREMENT PRIMARY KEY,
+    uid INT NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    dateCommande DATETIME NOT NULL,
+    statut varchar(20),
+    FOREIGN KEY (uid) REFERENCES Utilisateurs(uid)
+);
+
+CREATE TABLE LigneDeCommande (
+    cid INT NOT NULL,
+    pid INT NOT NULL,
+    prixAuMoment DECIMAL(10,2) NOT NULL,
+    quantite int NOT NULL,
+    FOREIGN KEY (cid) REFERENCES Commande (cid),
+    FOREIGN KEY (pid) REFERENCES Produit (pid)
+);
