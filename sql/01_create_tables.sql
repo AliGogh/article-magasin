@@ -65,15 +65,13 @@ CREATE TABLE LignePanier(
     FOREIGN KEY (pid) REFERENCES Produit(pid) ON DELETE CASCADE
 );
 
-
-
 CREATE TABLE Commande (
     cid int AUTO_INCREMENT PRIMARY KEY,
     uid INT NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     dateCommande DATETIME NOT NULL,
     statut varchar(20),
-    FOREIGN KEY (uid) REFERENCES Utilisateurs(uid)
+    FOREIGN KEY (uid) REFERENCES Utilisateur(uid)
 );
 
 CREATE TABLE LigneDeCommande (
