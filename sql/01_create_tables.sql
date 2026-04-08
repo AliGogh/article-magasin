@@ -82,3 +82,9 @@ CREATE TABLE LigneDeCommande (
     FOREIGN KEY (cid) REFERENCES Commande (cid),
     FOREIGN KEY (pid) REFERENCES Produit (pid)
 );
+
+#Indexes
+CREATE INDEX idx_commande_uid ON Commande(uid);
+CREATE INDEX idx_panier_uid ON Panier(uid);
+CREATE INDEX idx_lignedecommande_pid ON LigneDeCommande(pid);
+CREATE INDEX idx_lignedupanier_pid ON LignePanier(pid);
