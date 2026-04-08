@@ -63,3 +63,51 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+#Vérifier que chaque ligne du panier ne contient pas de valeur négative
+CREATE TRIGGER verifier_quantite_panier
+BEFORE INSERT ON LignePanier
+FOR EACH ROW
+BEGIN
+    IF NEW.quantite <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La quantité doit être positive';
+    END IF;
+END;
+
+#Vérifier que le total de commande est mis à jour après l'ajout d'une ligne de commande
+CREATE TRIGGER maj_total_commande
+AFTER INSERT ON LigneDeCommande
+FOR EACH ROW
+BEGIN
+    UPDATE Commande
+    SET total = total + (NEW.prixAuMoment * NEW.quantite)
+    WHERE cid = NEW.cid;
+END;
+
+#Vérifier que le solde du compte est suffisant pour effectuer un achat
+CREATE TRIGGER verif_solde_avant_commande
+BEFORE INSERT ON Commande
+FOR EACH ROW
+BEGIN
+    DECLARE solde DECIMAL(10,2);
+
+    SELECT soldeCompte INTO solde
+    FROM Utilisateur
+    WHERE uid = NEW.uid;
+
+    IF solde < NEW.total THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Solde insuffisant';
+    END IF;
+END;
+
+#Mettre à jour le solde du compte après achat
+CREATE TRIGGER maj_solde_utilisateur
+AFTER INSERT ON Commande
+FOR EACH ROW
+BEGIN
+    UPDATE Utilisateur
+    SET soldeCompte = soldeCompte - NEW.total
+    WHERE uid = NEW.uid;
+END;
