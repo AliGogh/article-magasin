@@ -1,3 +1,3 @@
 # Article Magasin
 ## Description
-Projet d'école réalisé par l'équipe X
+Projet de magasin en ligne réalisé par l'équipe 10 dans le contexte du cours de GLO-2005

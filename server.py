@@ -1,9 +1,15 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from database import Database
 
 app = Flask(__name__)
 db = Database()
 
+# -------------------------
+# ACCUEIL
+# -------------------------
+@app.route("/")
+def index():
+    return render_template('base.html')
 # -------------------------
 # ROUTE 1 : Voir produits
 # -------------------------
