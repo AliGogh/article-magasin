@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Produits{% endblock %}
+
+{% block content %}
+
+<h2>📦 Liste des produits</h2>
+
+{% if produits %}
+    {% for produit in produits %}
+        <div class="card">
+            <h3>{{ produit.nom }}</h3>
+            <p>💰 Prix : {{ produit.prix }} $</p>
+            <p>🏷️ Rabais : {{ produit.rabais * 100 }} %</p>
+
+            <button onclick="ajouterAuPanier({{ produit.pid }})">
+                ➕ Ajouter au panier
+            </button>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Aucun produit disponible.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block head %}
+<script>
+function ajouterAuPanier(pid) {
+    fetch("/panier/ajouter", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            panierId: 1,  // temporaire (tu peux améliorer plus tard)
+            pid: pid,
+            quantite: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Produit ajouté au panier !");
+    })
+    .catch(error => {
+        console.error("Erreur:", error);
+    });
+}
+</script>
+{% endblock %}

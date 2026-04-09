@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Panier{% endblock %}
+
+{% block content %}
+
+<h2>🛒 Mon panier</h2>
+
+{% if panier %}
+    {% set total = 0 %}
+
+    {% for item in panier %}
+        <div class="card">
+            <h3>{{ item.nom }}</h3>
+            <p>Quantité : {{ item.quantite }}</p>
+            <p>Prix unitaire : {{ item.prix }} $</p>
+
+            {% set sous_total = item.quantite * item.prix %}
+            <p>Sous-total : {{ sous_total }} $</p>
+
+            {% set total = total + sous_total %}
+        </div>
+    {% endfor %}
+
+    <h3>💰 Total : {{ total }} $</h3>
+
+    <button onclick="payer()">
+        💳 Payer
+    </button>
+
+{% else %}
+    <p>Votre panier est vide.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block head %}
+<script>
+function payer() {
+    fetch("/payer/1", {
+        method: "POST"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Commande créée avec succès !");
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error("Erreur:", error);
+    });
+}
+</script>
+{% endblock %}
