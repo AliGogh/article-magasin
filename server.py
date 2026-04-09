@@ -17,7 +17,7 @@ def index():
 def get_produits():
     db.execute("SELECT * FROM Produit")
     produits = db.fetchall()
-    return jsonify(produits)
+    return render_template("produits.html", produits=produits)
 
 
 # -------------------------
@@ -33,7 +33,7 @@ def get_panier(panier_id):
     """
     db.execute(query, (panier_id,))
     panier = db.fetchall()
-    return jsonify(panier)
+    return render_template("panier.html", panier=panier, panier_id=panier_id)
 
 
 # -------------------------
