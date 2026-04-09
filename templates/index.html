@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+    <h1>Bienvenue sur notre site</h1>
+
+    {% if session.get("courriel") %}
+        <p>Connecté en tant que {{ session["courriel"] }}</p>
+    {% else %}
+        <p>Vous n'êtes pas connecté.</p>
+    {% endif %}
+{% endblock %}

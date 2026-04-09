@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+<title>{% block title %}Boutique{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Accueil</a>
+        <a href="{{ url_for('inscription') }}">Inscription</a>
+        <a href="{{ url_for('connexion') }}">Connexion</a>
+        <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
+    </nav>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

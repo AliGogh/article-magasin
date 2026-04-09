@@ -1,15 +1,14 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import Database
 
 app = Flask(__name__)
+app.secret_key = "cle_secrete_projet"
 db = Database()
 
 # -------------------------
 # ACCUEIL
 # -------------------------
-@app.route("/")
-def index():
-    return render_template('base.html')
 # -------------------------
 # ROUTE 1 : Voir produits
 # -------------------------
@@ -62,6 +61,81 @@ def ajouter_panier():
 def payer(panier_id):
     db.call_procedure("creer_commande", (panier_id,))
     return jsonify({"message": "Commande créée avec succès"})
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+# -------------------------
+# INSCRIPTION
+# -------------------------
+@app.route("/inscription", methods=["GET", "POST"])
+def inscription():
+    if request.method == "POST":
+        courriel = request.form["courriel"].strip()
+        mot_de_passe = request.form["mot_de_passe"].strip()
+
+        if not courriel or not mot_de_passe:
+            flash("Tous les champs sont obligatoires.")
+            return render_template("inscription.html")
+
+        # Vérifier si le courriel existe déjà
+        query = "SELECT * FROM Utilisateur WHERE courriel = %s"
+        db.execute(query, (courriel,))
+        utilisateur_existant = db.fetchone()
+
+        if utilisateur_existant:
+            flash("Ce courriel est déjà utilisé.")
+            return render_template("inscription.html")
+
+        mot_de_passe_hash = generate_password_hash(mot_de_passe)
+
+        query = """
+            INSERT INTO Utilisateur (courriel, motDePasse, soldeCompte)
+            VALUES (%s, %s, %s)
+        """
+        db.execute(query, (courriel, mot_de_passe_hash, 0))
+
+        flash("Inscription réussie. Vous pouvez maintenant vous connecter.")
+        return redirect(url_for("connexion"))
+
+    return render_template("inscription.html")
+
+
+# -------------------------
+# CONNEXION
+# -------------------------
+@app.route("/connexion", methods=["GET", "POST"])
+def connexion():
+    if request.method == "POST":
+        courriel = request.form["courriel"].strip()
+        mot_de_passe = request.form["mot_de_passe"].strip()
+
+        query = "SELECT * FROM Utilisateur WHERE courriel = %s"
+        db.execute(query, (courriel,))
+        utilisateur = db.fetchone()
+
+        if utilisateur and check_password_hash(utilisateur["motDePasse"], mot_de_passe):
+            session["uid"] = utilisateur["uid"]
+            session["courriel"] = utilisateur["courriel"]
+
+            flash("Connexion réussie.")
+            return redirect(url_for("index"))
+
+        flash("Courriel ou mot de passe invalide.")
+        return render_template("connexion.html")
+
+    return render_template("connexion.html")
+
+
+# -------------------------
+# DECONNEXION
+# -------------------------
+@app.route("/deconnexion")
+def deconnexion():
+    session.clear()
+    flash("Vous êtes déconnecté.")
+    return redirect(url_for("index"))
 
 
 # -------------------------
