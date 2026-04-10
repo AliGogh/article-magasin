@@ -2,29 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Magasin{% endblock %}</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
-
-    {% block head %}{% endblock %}
+    <title>{% block title %}Mon Magasin{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<header>
-    <h1>🛒 Mon Magasin</h1>
-    <nav>
-        <a href="/">Accueil</a>
-        <a href="/produits">Produits</a>
-        <a href="/panier/1">Panier</a>
-        <a href="/inscription">Créer un compte</a>
-        <a href="/connexion">Se connecter</a>
+    {% if request.path != '/' %}
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}">Accueil</a>
+        <a href="{{ url_for('get_produits') }}">Produits</a>
+        <a href="{{ url_for('inscription') }}">S'inscrire</a>
+        <a href="{{ url_for('connexion') }}">Se connecter</a>
+        <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
     </nav>
-</header>
+    {% endif %}
 
-<div class="container">
-    {% block content %}
-    {% endblock %}
-</div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for message in messages %}
+                    <p class="flash-message">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

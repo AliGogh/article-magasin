@@ -3,11 +3,14 @@
 {% block title %}Accueil{% endblock %}
 
 {% block content %}
-    <h1>Bienvenue sur notre site</h1>
+<div class="accueil-container">
+    <h1 class="titre-site">Mon Magasin</h1>
 
-    {% if session.get("courriel") %}
-        <p>Connecté en tant que {{ session["courriel"] }}</p>
-    {% else %}
-        <p>Vous n'êtes pas connecté.</p>
-    {% endif %}
+    <div class="accueil-onglets">
+        <a href="{{ url_for('get_produits') }}" class="onglet">Rentrer sur le site</a>
+        <a href="{{ url_for('inscription') }}" class="onglet">S'inscrire</a>
+        <a href="{{ url_for('connexion') }}" class="onglet">Se connecter</a>
+    </div>
+    <img src="{{ url_for('static', filename='images/magasin.jpg') }}" class="image-accueil">
+</div>
 {% endblock %}
