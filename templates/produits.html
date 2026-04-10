@@ -10,41 +10,50 @@
     {% for produit in produits %}
         <div class="card">
             <h3>{{ produit.nom }}</h3>
-            <p>💰 Prix : {{ produit.prix }} $</p>
-            <p>🏷️ Rabais : {{ produit.rabais * 100 }} %</p>
+            <p><strong>Type :</strong> {{ produit.type_produit }}</p>
+            <p><strong>Prix régulier :</strong> {{ "%.2f"|format(produit.prix) }} $</p>
+            <p><strong>Rabais :</strong> {{ "%.0f"|format(produit.rabais * 100) }} %</p>
+            <p><strong>Prix après rabais :</strong> {{ "%.2f"|format(produit.prix_final) }} $</p>
 
-            <button onclick="ajouterAuPanier({{ produit.pid }})">
-                ➕ Ajouter au panier
-            </button>
+            {% if produit.type_produit == "Vêtement" %}
+                <ul class="caracteristiques">
+                    <li>Taille : {{ produit.taille }}</li>
+                    <li>Sexe : {{ produit.sexe }}</li>
+                    <li>Couleur : {{ produit.couleur_vetement }}</li>
+                    <li>Marque : {{ produit.marque }}</li>
+                </ul>
+            {% elif produit.type_produit == "Meuble" %}
+                <ul class="caracteristiques">
+                    <li>Matériau : {{ produit.materiau }}</li>
+                    <li>Dimensions : {{ produit.dimension }}</li>
+                    <li>Couleur : {{ produit.couleur_meuble }}</li>
+                    <li>Poids : {{ produit.poids }} kg</li>
+                </ul>
+            {% elif produit.type_produit == "Livre" %}
+                <ul class="caracteristiques">
+                    <li>Genre : {{ produit.genre }}</li>
+                    <li>Auteur : {{ produit.auteur }}</li>
+                    <li>Date de parution : {{ produit.dateParution }}</li>
+                    <li>Langue : {{ produit.langue }}</li>
+                </ul>
+            {% endif %}
+
+            {% if session.get("uid") %}
+                <form method="POST" action="{{ url_for('ajouter_panier') }}" class="inline-form">
+                    <input type="hidden" name="pid" value="{{ produit.pid }}">
+                    <label>
+                        Quantité
+                        <input type="number" name="quantite" value="1" min="1">
+                    </label>
+                    <button type="submit">Ajouter au panier</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('connexion') }}" class="button-link">Se connecter pour ajouter au panier</a>
+            {% endif %}
         </div>
     {% endfor %}
 {% else %}
     <p>Aucun produit disponible.</p>
 {% endif %}
 
-{% endblock %}
-
-{% block head %}
-<script>
-function ajouterAuPanier(pid) {
-    fetch("/panier/ajouter", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            panierId: 1,  // temporaire (tu peux améliorer plus tard)
-            pid: pid,
-            quantite: 1
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert("Produit ajouté au panier !");
-    })
-    .catch(error => {
-        console.error("Erreur:", error);
-    });
-}
-</script>
 {% endblock %}

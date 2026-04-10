@@ -7,9 +7,15 @@
     <h1 class="titre-site">Mon Magasin</h1>
 
     <div class="accueil-onglets">
-        <a href="{{ url_for('get_produits') }}" class="onglet">Rentrer sur le site</a>
-        <a href="{{ url_for('inscription') }}" class="onglet">S'inscrire</a>
-        <a href="{{ url_for('connexion') }}" class="onglet">Se connecter</a>
+        <a href="{{ url_for('get_produits') }}" class="onglet">Voir les produits</a>
+        {% if session.get("uid") %}
+            <a href="{{ url_for('get_panier') }}" class="onglet">Voir mon panier</a>
+            <a href="{{ url_for('profil') }}" class="onglet">Voir mon profil</a>
+            <a href="{{ url_for('deconnexion') }}" class="onglet">Se déconnecter</a>
+        {% else %}
+            <a href="{{ url_for('inscription') }}" class="onglet">S'inscrire</a>
+            <a href="{{ url_for('connexion') }}" class="onglet">Se connecter</a>
+        {% endif %}
     </div>
     <img src="{{ url_for('static', filename='images/magasin.jpg') }}" class="image-accueil">
 </div>

@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <title>{% block title %}Mon Magasin{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
 </head>
 <body>
 
-    {% if request.path != '/' %}
     <nav class="navbar">
         <a href="{{ url_for('index') }}">Accueil</a>
         <a href="{{ url_for('get_produits') }}">Produits</a>
-        <a href="{{ url_for('inscription') }}">S'inscrire</a>
-        <a href="{{ url_for('connexion') }}">Se connecter</a>
-        <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
+
+        {% if session.get("uid") %}
+            <a href="{{ url_for('get_panier') }}">Panier</a>
+            <a href="{{ url_for('profil') }}">Profil</a>
+            <span class="navbar-user">{{ session.get("courriel") }}</span>
+            <a href="{{ url_for('deconnexion') }}">Se déconnecter</a>
+        {% else %}
+            <a href="{{ url_for('inscription') }}">S'inscrire</a>
+            <a href="{{ url_for('connexion') }}">Se connecter</a>
+        {% endif %}
     </nav>
-    {% endif %}
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}

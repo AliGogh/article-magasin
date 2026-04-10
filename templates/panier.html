@@ -7,47 +7,45 @@
 <h2>🛒 Mon panier</h2>
 
 {% if panier %}
-    {% set total = 0 %}
+    <div class="card">
+        <p><strong>Solde du compte :</strong> {{ "%.2f"|format(solde) }} $</p>
+        <p><strong>Total du panier :</strong> {{ "%.2f"|format(total) }} $</p>
+
+        {% if total > solde %}
+            <p class="warning-message">
+                Votre solde est insuffisant pour passer cette commande.
+                Ajoutez de l'argent à votre profil avant de payer.
+            </p>
+            <a href="{{ url_for('profil') }}" class="button-link">Ajouter de l'argent</a>
+        {% endif %}
+    </div>
 
     {% for item in panier %}
         <div class="card">
             <h3>{{ item.nom }}</h3>
             <p>Quantité : {{ item.quantite }}</p>
-            <p>Prix unitaire : {{ item.prix }} $</p>
-
-            {% set sous_total = item.quantite * item.prix %}
-            <p>Sous-total : {{ sous_total }} $</p>
-
-            {% set total = total + sous_total %}
+            <p>Prix régulier : {{ "%.2f"|format(item.prix) }} $</p>
+            <p>Rabais : {{ "%.0f"|format(item.rabais * 100) }} %</p>
+            <p>Prix après rabais : {{ "%.2f"|format(item.prix_final) }} $</p>
+            <p>Sous-total : {{ "%.2f"|format(item.sous_total) }} $</p>
         </div>
     {% endfor %}
 
-    <h3>💰 Total : {{ total }} $</h3>
+    <h3>💰 Total : {{ "%.2f"|format(total) }} $</h3>
 
-    <button onclick="payer()">
-        💳 Payer
-    </button>
+    {% if total <= solde %}
+        <form method="POST" action="{{ url_for('payer') }}" class="inline-form">
+            <button type="submit">Passer la commande</button>
+        </form>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('vider_panier') }}" class="inline-form">
+        <button type="submit" class="secondary-button">Vider le panier</button>
+    </form>
 
 {% else %}
     <p>Votre panier est vide.</p>
+    <a href="{{ url_for('get_produits') }}" class="button-link">Voir les produits</a>
 {% endif %}
 
-{% endblock %}
-
-{% block head %}
-<script>
-function payer() {
-    fetch("/payer/1", {
-        method: "POST"
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert("Commande créée avec succès !");
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error("Erreur:", error);
-    });
-}
-</script>
 {% endblock %}

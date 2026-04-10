@@ -9,7 +9,8 @@ CREATE PROCEDURE ajouter_au_panier(
 )
 BEGIN
     INSERT INTO LignePanier(panierId, pid, quantite)
-    VALUES (p_panierId, p_pid, p_quantite);
+    VALUES (p_panierId, p_pid, p_quantite)
+    ON DUPLICATE KEY UPDATE quantite = quantite + VALUES(quantite);
 END $$
 
 DELIMITER ;
@@ -23,40 +24,57 @@ CREATE PROCEDURE creer_commande(IN p_panierId INT)
 BEGIN
     DECLARE v_uid INT;
     DECLARE v_cid INT;
+    DECLARE v_total DECIMAL(10,2);
+    DECLARE v_solde DECIMAL(10,2);
 
     -- 1. Trouver l'utilisateur du panier
     SELECT uid INTO v_uid
     FROM Panier
     WHERE panierId = p_panierId;
 
-    -- 2. Créer la commande
-    INSERT INTO Commande ( uid, total, dateCommande, statut)
-    VALUES (v_uid, 0, NOW(), 'en cours');
-
-    -- 3. Récupérer l'id de la commande créée
-    SET v_cid = LAST_INSERT_ID();
-
-    -- 4. Copier les produits du panier vers la commande
-    INSERT INTO LigneDeCommande (cid, pid, prixAuMoment, quantite)
-    SELECT
-        v_cid,
-        lp.pid,
-        lp.quantite,
-        p.prix
+    -- 2. Calculer le total avant de créer la commande afin de vérifier le solde.
+    SELECT COALESCE(SUM(lp.quantite * ROUND(p.prix * (1 - COALESCE(p.rabais, 0)), 2)), 0)
+    INTO v_total
     FROM LignePanier lp
     JOIN Produit p ON lp.pid = p.pid
     WHERE lp.panierId = p_panierId;
 
-    -- 5. Calculer le total
-    UPDATE Commande
-    SET total = (
-        SELECT SUM(quantite * prixAuMoment)
-        FROM LigneDeCommande
-        WHERE cid = v_cid
-    )
-    WHERE cid = v_cid;
+    SELECT soldeCompte INTO v_solde
+    FROM Utilisateur
+    WHERE uid = v_uid;
 
-    -- 6. Vider le panier
+    IF v_total > v_solde THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Solde insuffisant';
+    END IF;
+
+    -- 3. Créer la commande
+    -- Le total commence à 0 parce que le trigger maj_total_commande l'augmente
+    -- automatiquement quand les lignes de commande sont insérées.
+    INSERT INTO Commande ( uid, total, dateCommande, statut)
+    VALUES (v_uid, 0, NOW(), 'en cours');
+
+    -- 4. Récupérer l'id de la commande créée
+    SET v_cid = LAST_INSERT_ID();
+
+    -- 5. Copier les produits du panier vers la commande
+    -- prixAuMoment conserve le prix après rabais au moment de l'achat.
+    INSERT INTO LigneDeCommande (cid, pid, prixAuMoment, quantite)
+    SELECT
+        v_cid,
+        lp.pid,
+        ROUND(p.prix * (1 - COALESCE(p.rabais, 0)), 2),
+        lp.quantite
+    FROM LignePanier lp
+    JOIN Produit p ON lp.pid = p.pid
+    WHERE lp.panierId = p_panierId;
+
+    -- 6. Débiter le solde maintenant que la commande est créée.
+    UPDATE Utilisateur
+    SET soldeCompte = soldeCompte - v_total
+    WHERE uid = v_uid;
+
+    -- 7. Vider le panier
     DELETE FROM LignePanier
     WHERE panierId = p_panierId;
 
