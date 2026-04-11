@@ -11,6 +11,8 @@
         <p><strong>Solde du compte :</strong> {{ "%.2f"|format(solde) }} $</p>
         <p><strong>Total du panier :</strong> {{ "%.2f"|format(total) }} $</p>
 
+        {# Le bouton de commande est masqué quand le total dépasse le solde. La
+           route /payer refait quand même la même vérification côté serveur. #}
         {% if total > solde %}
             <p class="warning-message">
                 Votre solde est insuffisant pour passer cette commande.
@@ -39,6 +41,8 @@
         </form>
     {% endif %}
 
+    {# Le formulaire POST évite de créer une commande via une simple navigation
+       GET ou un rechargement de lien. #}
     <form method="POST" action="{{ url_for('vider_panier') }}" class="inline-form">
         <button type="submit" class="secondary-button">Vider le panier</button>
     </form>

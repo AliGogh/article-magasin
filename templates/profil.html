@@ -6,12 +6,16 @@
 
 <h2>Profil</h2>
 
+{# Résumé du compte courant. Le solde est rechargé depuis la base à chaque
+   affichage pour refléter les dépôts et commandes récents. #}
 <div class="card">
     <h3>Compte</h3>
     <p><strong>Courriel :</strong> {{ utilisateur.courriel }}</p>
     <p><strong>Solde actuel :</strong> {{ "%.2f"|format(utilisateur.soldeCompte) }} $</p>
 </div>
 
+{# Formulaire volontairement simple pour le projet: un dépôt augmente directement
+   le solde du compte connecté via la route /profil/ajouter-solde. #}
 <div class="card">
     <h3>Ajouter de l'argent</h3>
     <form method="POST" action="{{ url_for('ajouter_solde') }}" class="inline-form">

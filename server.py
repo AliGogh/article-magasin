@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import Database
 
 app = Flask(__name__)
+# La clé secrète permet à Flask de signer les cookies de session et les messages
+# flash. Dans un vrai déploiement, elle devrait venir d'une variable d'environnement.
 app.secret_key = "cle_secrete_projet"
 db = Database()
 
@@ -173,6 +175,12 @@ def get_produits():
 @app.route("/panier", methods=["GET"])
 @login_required
 def get_panier():
+    """Affiche le panier de l'utilisateur connecté.
+
+    On ne reçoit pas l'identifiant du panier depuis l'URL ici: le panier est
+    trouvé à partir de session["uid"], ce qui évite qu'un utilisateur consulte
+    le panier d'un autre compte.
+    """
     panier_id = get_or_create_panier_id(session["uid"])
     panier = fetch_panier_items(panier_id)
     total = calculer_total_panier(panier)
@@ -222,6 +230,7 @@ def get_panier_par_id(panier_id):
 @app.route("/panier/ajouter", methods=["POST"])
 @login_required
 def ajouter_panier():
+    """Ajoute un produit au panier de l'utilisateur connecté."""
     # La route accepte les formulaires HTML et le JSON. Le formulaire est le
     # chemin principal dans les templates, mais garder JSON permet de réutiliser
     # la route avec du JavaScript si l'interface évolue.
@@ -262,6 +271,7 @@ def ajouter_panier():
 @app.route("/panier/vider", methods=["POST"])
 @login_required
 def vider_panier():
+    """Supprime toutes les lignes du panier courant sans supprimer le panier."""
     panier_id = get_or_create_panier_id(session["uid"])
     db.execute("DELETE FROM LignePanier WHERE panierId = %s", (panier_id,))
     flash("Votre panier a été vidé.")
@@ -274,6 +284,7 @@ def vider_panier():
 @app.route("/payer", methods=["POST"])
 @login_required
 def payer():
+    """Transforme le panier courant en commande si le solde est suffisant."""
     panier_id = get_or_create_panier_id(session["uid"])
     panier = fetch_panier_items(panier_id)
 
@@ -383,6 +394,7 @@ def payer_ancien_lien(panier_id):
 @app.route("/profil", methods=["GET"])
 @login_required
 def profil():
+    """Affiche un aperçu du compte et du solde de l'utilisateur connecté."""
     utilisateur = get_utilisateur_connecte()
     return render_template("profil.html", utilisateur=utilisateur)
 
@@ -390,6 +402,7 @@ def profil():
 @app.route("/profil/ajouter-solde", methods=["POST"])
 @login_required
 def ajouter_solde():
+    """Ajoute un montant positif au solde du compte connecté."""
     montant = convertir_montant(request.form.get("montant"))
 
     if montant is None:
@@ -413,6 +426,7 @@ def ajouter_solde():
 
 @app.route("/")
 def index():
+    """Affiche la page d'accueil du magasin."""
     return render_template("index.html")
 
 # -------------------------
@@ -420,6 +434,7 @@ def index():
 # -------------------------
 @app.route("/inscription", methods=["GET", "POST"])
 def inscription():
+    """Crée un compte utilisateur avec un mot de passe haché."""
     if request.method == "POST":
         courriel = request.form["courriel"].strip()
         mot_de_passe = request.form["mot_de_passe"].strip()
@@ -456,6 +471,7 @@ def inscription():
 # -------------------------
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
+    """Connecte un utilisateur et place son uid dans la session Flask."""
     if request.method == "POST":
         courriel = request.form["courriel"].strip()
         mot_de_passe = request.form["mot_de_passe"].strip()
@@ -482,6 +498,7 @@ def connexion():
 # -------------------------
 @app.route("/deconnexion")
 def deconnexion():
+    """Déconnecte l'utilisateur en vidant toutes les données de session."""
     session.clear()
     flash("Vous êtes déconnecté.")
     return redirect(url_for("index"))

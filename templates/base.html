@@ -8,6 +8,8 @@
 </head>
 <body>
 
+    {# Barre de navigation commune à toutes les pages. Les liens de panier et de
+       profil sont affichés seulement lorsqu'un utilisateur est connecté. #}
     <nav class="navbar">
         <a href="{{ url_for('index') }}">Accueil</a>
         <a href="{{ url_for('get_produits') }}">Produits</a>
@@ -23,6 +25,8 @@
         {% endif %}
     </nav>
 
+    {# Affichage centralisé des messages flash envoyés par les routes Flask:
+       connexion, erreurs de panier, confirmation de commande, etc. #}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="flash-container">

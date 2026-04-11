@@ -15,6 +15,8 @@
             <p><strong>Rabais :</strong> {{ "%.0f"|format(produit.rabais * 100) }} %</p>
             <p><strong>Prix après rabais :</strong> {{ "%.2f"|format(produit.prix_final) }} $</p>
 
+            {# Les produits partagent les champs de Produit, mais les attributs
+               détaillés changent selon la table spécialisée jointe côté Flask. #}
             {% if produit.type_produit == "Vêtement" %}
                 <ul class="caracteristiques">
                     <li>Taille : {{ produit.taille }}</li>
@@ -38,6 +40,8 @@
                 </ul>
             {% endif %}
 
+            {# Un utilisateur non connecté peut consulter les produits, mais il
+               doit se connecter avant de pouvoir modifier un panier. #}
             {% if session.get("uid") %}
                 <form method="POST" action="{{ url_for('ajouter_panier') }}" class="inline-form">
                     <input type="hidden" name="pid" value="{{ produit.pid }}">
