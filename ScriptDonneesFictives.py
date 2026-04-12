@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 conn = mysql.connector.connect(
-    host=os.getenv("MYSQL_HOST"),
-    user=os.getenv("MYSQL_USER"),
-    password=os.getenv("PASSWORD"),
-    database=os.getenv("DATABASE"),
+    host="127.0.0.1",
+    user="root",
+    password="Leiabidou2180",
+    database="article_magasin",
+    port=3306,
+    use_pure=True
 )
 
 cursor = conn.cursor()
@@ -51,10 +53,6 @@ for i in range(1, 101):
     except mysql.connector.Error as err:
         print(f"Erreur à l'insertion {i}: {err}")
 
-conn.commit()
-cursor.close()
-conn.close()
-
 #######################################SECTION MEUBLES#######################################
 
 materiaux_list = ["Bois", "Tissu", "Métal", "Cuir"]
@@ -90,9 +88,6 @@ for i in range(101, 201):
     except mysql.connector.Error as err:
         print(f"Erreur à l'insertion {i}: {err}")
 
-conn.commit()
-cursor.close()
-conn.close()
 
 #######################################SECTION LIVRES##########################################
 genres_list = ["Roman", "Science-fiction", "Fantaisie", "Histoire", "Informatique"]
