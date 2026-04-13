@@ -166,7 +166,14 @@ def get_produits():
     """
     db.execute(query)
     produits = db.fetchall()
-    return render_template("produits.html", produits=produits)
+    db.execute("""
+            SELECT *
+            FROM Produit
+            ORDER BY rabais DESC
+            LIMIT 1
+        """)
+    produit_top = db.fetchone()
+    return render_template("produits.html", produits=produits, produit_top=produit_top)
 
 
 # -------------------------
@@ -465,6 +472,19 @@ def inscription():
 
     return render_template("inscription.html")
 
+# -------------------------
+# Produit avec le plus gros rabais
+# -------------------------
+@app.route("/rabais")
+def produits_rabais():
+    query = """
+        SELECT * 
+        FROM Produit
+        ORDER BY rabais DESC
+    """
+    db.execute(query)
+    produits = db.fetchall()
+    return render_template("produits.html", produits=produits)
 
 # -------------------------
 # CONNEXION

@@ -7,6 +7,27 @@
 <h2>📦 Liste des produits</h2>
 
 {% if produits %}
+    <div class="card" style="border: 2px solid gold;">
+        <h2>Le meilleur rabais !</h2>
+        <h3>{{ produit_top.nom }}</h3>
+        <p>Prix : {{ "%.2f"|format(produit_top.prix) }} $</p>
+        <p>Rabais : {{ "%.0f"|format(produit_top.rabais * 100) }} %</p>
+        <p>Prix après rabais : {{ "%.2f"|format(produit_top.prix * (1 - produit_top.rabais)) }} $</p>
+        {# Un utilisateur non connecté peut consulter les produits, mais il
+               doit se connecter avant de pouvoir modifier un panier. #}
+            {% if session.get("uid") %}
+                <form method="POST" action="{{ url_for('ajouter_panier') }}" class="inline-form">
+                    <input type="hidden" name="pid" value="{{ produit_top.pid }}">
+                    <label>
+                        Quantité
+                        <input type="number" name="quantite" value="1" min="1">
+                    </label>
+                    <button type="submit">Ajouter au panier</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('connexion') }}" class="button-link">Se connecter pour ajouter au panier</a>
+            {% endif %}
+    </div>
     {% for produit in produits %}
         <div class="card">
             <h3>{{ produit.nom }}</h3>
